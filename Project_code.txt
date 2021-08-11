@@ -1,0 +1,51 @@
+Data Visualization Using R:(Codes of the Visualization) 
+
+q.1>which category has the most no. of applications?
+Code—>
+ggplot(data=app)+geom_bar(mapping=aes(x=Category,fill=Category))+theme(axis.text.x = element_text(angle=90))+labs(title="Category count")
+
+q.2> what is the relation between no. of Reviews and Rating ?
+code--> ggplot(data=app)+geom_point(mapping=aes(y=Reviews,x=Rating))+geom_vline(xintercept = mean(app$Rating),col="red")+geom_hline(yintercept = mean(app$Reviews),col="red")+facet_wrap("Category")
+
+q.3>Is there any relation between installs and  no. of reviews.
+code—>
+Modifying the installs column 
+app$Installs<-as.integer(gsub("[+,]","",app$Installs))
+app$Installs<-(gsub("[A-Za-z]","0",app$Installs))
+
+relation
+cor(app$Reviews,app$Installs) #result- 0.6251652
+ggplot(data=app)+geom_point(mapping=aes(y=Reviews,x=Installs,col=Category))+geom_smooth(mapping=aes(y=Reviews,x=Installs),col="red")
+
+
+q.4>Is there any relation between installs and  rating.
+    Code->
+    cor(app$Rating,app$Installs)
+    ggplot(data=app)+geom_point(mapping=aes(x=Rating,Installs,col=Installs))+geom_smooth(mapping=aes(x=Rating,y=Installs),col="red")
+    Another plotting for better visualization. 
+    Code->
+    ggplot(data=app)+geom_line(mapping=aes(Rating,Installs))+facet_wrap("Category")
+
+q.5>So now,what are the categories that are carrying apps with higher no. of installs and reviews?
+For finding Category Set
+    Code->
+    app1<-subset(app, Reviews>=mean(Reviews), Installs>=mean(Installs)); nrow(app1)
+    s<-as.data.frame(table(app1$Category));s
+    best_category<-s[s[,2]>=50,]
+    ggplot(data=best_category)+geom_tile(mapping=aes(x=Var1,y=Freq,fill=Var1))
+Code
+v<-as.data.frame(table(app$Category));v
+d<-subset(v,v$Var1 %in% best_category$Var1);d
+nrow(d);nrow(best_category)
+for(i in 1:nrow(d)){
+  best_category[i,”density”]<-as.numeric(best_category[i,2])/as.numeric(d[i,2])
+}
+ggplot(data=best_category)+geom_tile(mapping=aes(x=Var1,y=density,fill=Var1))
+
+q.6> which Content.Rating has the highest no. of apps?
+Code
+ggplot(data=app,aes(y=Content.Rating))+geom_bar(mapping=aes(fill=Content.Rating))+geom_text(aes(label=stat(count)),stat='count')
+. Study of Install vs Rating, Content Rating wise—
+Code
+ggplot(data=app)+geom_line(mapping=aes(x=Rating,y=Installs,col=Installs))+facet_wrap("Content.Rating")
+
